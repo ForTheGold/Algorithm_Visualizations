@@ -1,0 +1,431 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <!-- Bootstrap CSS -->
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous"> -->
+    <style>
+        .droptarget {
+            float: left;
+            width: 100px;
+            height: 35px;
+            margin: 15px;
+            margin-right: 100px;
+            padding: 10px;
+            border: 1px solid #aaaaaa;
+        }
+
+        table,
+        td {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 20px;
+            user - select: none;
+        }
+
+        td.active {
+            background-color: red;
+        }
+
+        .purple {
+            background-color: purple !important;
+        }
+
+        #draggable-start {
+            width: 20px;
+            height: 20px;
+            text-align: center;
+        }
+
+        .dropzone {
+            width: 20px;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+
+        .white {
+            background: white !important;
+        }
+
+        .grey {
+            background: grey !important;
+        }
+
+        .black {
+            background: rgba(1, 1, 1) !important;
+        }
+
+        .green {
+            background: green !important;
+        }
+    </style>
+</head>
+
+<body>
+
+
+
+    <table id="graph-table">
+
+    </table>
+
+
+    <div class="dropzone">
+        <div id="draggable-start" draggable="true" ondragstart="event.dataTransfer.setData('text/plain',null)">
+            S
+        </div>
+    </div>
+    <div class="dropzone">
+        <div id="draggable-finish" draggable="true" ondragstart="event.dataTransfer.setData('text/plain',null)">
+            F
+        </div>
+    </div>
+    <button type="button" class="btn btn-primary" onclick="handleGetPathClick()">Calculate Path</button>
+
+
+
+
+
+    <script>
+        var array = [
+            [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+            [-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1],
+            [-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1],
+            [-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1],
+            [-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1],
+            [-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1],
+            [-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1],
+            [-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1],
+            [-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1],
+            [-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1],
+            [-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1],
+            [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
+        ]
+
+        var bfsArray = [
+            [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+            [-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1],
+            [-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1],
+            [-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1],
+            [-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1],
+            [-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1],
+            [-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1],
+            [-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1],
+            [-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1],
+            [-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1],
+            [-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1],
+            [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
+        ]
+
+        var bfsQueue = []
+        var visited = []
+        var startLocation = [-1, -1]
+        var path = null
+        var pathArray = []
+        var waitTime = 10
+
+
+        function drawTable() {
+
+            const newTable = document.getElementById("graph-table")
+            tableRow = newTable.insertRow()
+            for (let i = 0; i < array.length; i++) {
+                for (let j = 0; j < array[i].length; j++) {
+                    if (array[i][j] === -1) {
+                        continue
+                    }
+                    cell = tableRow.insertCell()
+                    cell.classList.toggle('dropzone')
+                    cell.id = `${i} ${j} demo`
+                    if (array[i][j] === 0) {
+                        cell.classList.toggle('active')
+                    } else if (array[i][j] === 'S') {
+                        cell.classList.toggle('purple')
+                        cell.innerHTML = `<div id = "draggable-start" draggable = "true" ondragstart = "event.dataTransfer.setData('text/plain',null)">
+                                                S
+                                            </div>`
+                    } else if (array[i][j] === 'F') {
+                        cell.classList.toggle('purple')
+                        cell.innerHTML = `<div id = "draggable-finish" draggable = "true" ondragstart = "event.dataTransfer.setData('text/plain',null)">
+                                                F
+                                            </div>`
+                    }
+
+                }
+                tableRow = newTable.insertRow()
+                newTable.appendChild(tableRow)
+            }
+        }
+
+        function drawTable2() {
+
+            const newTable = document.getElementById("graph-table")
+            tableRow = newTable.insertRow()
+            for (let i = 0; i < bfsArray.length; i++) {
+                for (let j = 0; j < bfsArray[i].length; j++) {
+                    if (array[i][j] === -1) {
+                        continue
+                    }
+
+
+                    cell = tableRow.insertCell()
+                    cell.classList.toggle('dropzone')
+                    cell.id = `${i} ${j} demo`
+
+                    if (array[i][j] === 0) {
+                        cell.classList.toggle('active')
+                    } else if (array[i][j] === 'S') {
+                        cell.classList.toggle('purple')
+                        cell.innerHTML = `<div id = "draggable-start" draggable = "true" ondragstart = "event.dataTransfer.setData('text/plain',null)">
+                                                S
+                                            </div>`
+                    } else if (array[i][j] === 'F') {
+                        cell.classList.toggle('purple')
+                        cell.innerHTML = `<div id = "draggable-finish" draggable = "true" ondragstart = "event.dataTransfer.setData('text/plain',null)">
+                                                F
+                                            </div>`
+                    } else if (bfsArray[i][j][0] === 0) {
+                        cell.classList.toggle('white')
+                    } else if (bfsArray[i][j][0] === 1) {
+                        cell.classList.toggle('grey')
+                    } else if (bfsArray[i][j][0] === 2) {
+                        cell.classList.toggle('black')
+                    }
+                    for (let k = 0; k < pathArray.length; k++) {
+                        if (pathArray[k][0] === i && pathArray[k][1] === j) {
+                            cell.classList.remove('white')
+                            cell.classList.remove('grey')
+                            cell.classList.remove('black')
+                            cell.classList.toggle('green')
+                        }
+                    }
+
+                }
+                tableRow = newTable.insertRow()
+                newTable.appendChild(tableRow)
+
+            }
+        }
+
+        function removeTable() {
+            const newTable = document.getElementById("graph-table")
+            while (newTable.hasChildNodes()) {
+                newTable.firstChild.remove();
+            }
+        }
+
+        drawTable()
+
+        var table = document.getElementById('graph-table')
+        var tableEntry = table.getElementsByTagName('td')
+        var isToggling = false
+
+        function enableToggle(e) {
+            isToggling = true
+
+            if (e.target !== table) {
+                toggle(e)
+            }
+        }
+
+        function disableToggle() {
+            isToggling = false
+            removeTable()
+            drawTable()
+            startGame()
+        }
+
+        function toggle(e) {
+            if (isToggling === false) {
+                return
+            }
+            let nums = e.target.id.split(" ")
+            if (array[nums[0]][nums[1]] === 0) {
+                array[nums[0]][nums[1]] = 1
+            } else if (array[nums[0]][nums[1]] === 1) {
+                array[nums[0]][nums[1]] = 0
+            }
+            e.target.classList.toggle('active')
+        }
+
+        function startGame() {
+            table.onmousedown = enableToggle
+
+            for (var i = 0, il = tableEntry.length; i < il; i++) {
+                tableEntry[i].onmouseenter = toggle
+            }
+
+            table.onmouseup = disableToggle
+        }
+
+        startGame()
+
+        var dragged
+
+        /* events fired on the draggable target */
+        document.addEventListener("drag", function (event) {
+
+        }, false);
+
+        document.addEventListener("dragstart", function (event) {
+            // store a ref. on the dragged elem
+            dragged = event.target;
+            // make it half transparent
+            event.target.style.opacity = .5;
+
+        }, false);
+
+        document.addEventListener("dragend", function (event) {
+            // reset the transparency
+            event.target.style.opacity = "";
+        }, false);
+
+        /* events fired on the drop targets */
+        document.addEventListener("dragover", function (event) {
+            // prevent default to allow drop
+            event.preventDefault();
+        }, false);
+
+        document.addEventListener("dragenter", function (event) {
+            // highlight potential drop target when the draggable element enters it
+            if (event.target.className == "dropzone") {
+                event.target.style.background = "purple";
+            }
+
+        }, false);
+
+        document.addEventListener("dragleave", function (event) {
+            // reset background of potential drop target when the draggable element leaves it
+            if (event.target.className == "dropzone") {
+                event.target.style.background = "";
+                let loc = event.target.id.split(" ")
+            }
+
+        }, false);
+
+        document.addEventListener("drop", function (event) {
+            // prevent default action (open as link for some elements)
+            event.preventDefault();
+            // move dragged elem to the selected drop target
+            if (event.target.className == "dropzone") {
+                event.target.style.background = "";
+                dragged.parentNode.removeChild(dragged);
+                event.target.appendChild(dragged);
+            }
+            if (dragged.id === "draggable-start") {
+                for (i = 0; i < array.length; i++) {
+                    for (j = 0; j < array[i].length; j++) {
+                        if (array[i][j] === 'S') {
+                            array[i][j] = 1
+                        }
+                    }
+                }
+                startLocation = event.target.id.split(" ")
+                array[startLocation[0]][startLocation[1]] = 'S'
+                removeTable()
+                drawTable()
+            }
+            if (dragged.id === "draggable-finish") {
+                for (i = 0; i < array.length; i++) {
+                    for (j = 0; j < array[i].length; j++) {
+                        if (array[i][j] === 'F') {
+                            array[i][j] = 1
+                        }
+                    }
+                }
+                startLocation = event.target.id.split(" ")
+                array[startLocation[0]][startLocation[1]] = 'F'
+                removeTable()
+                drawTable()
+            }
+
+        }, false);
+
+        function checker(mainArray, subArray) {
+            for (let i = 0; i < mainArray.length; i++) {
+                if (mainArray[i][0] === subArray[0] && mainArray[i][1] === subArray[1]) {
+                    return true
+                }
+
+            }
+            return false
+        }
+
+        function createBFSArray() {
+            bfsQueue = []
+            visited = []
+            startLocation = [-1, -1]
+            for (let i = 0; i < array.length; i++) {
+                for (let j = 0; j < array[i].length; j++) {
+                    if (array[i][j] === -1 || array[i][j] === 0) {
+                        bfsArray[i][j] = []
+                    } else if (array[i][j] === 'S') {
+                        bfsArray[i][j] = [1, 0, null]
+                        bfsQueue.push([i, j])
+                        visited.push([i, j])
+                    } else {
+                        bfsArray[i][j] = [0, 0, null]
+                    }
+                }
+            }
+        }
+
+        function resolveAfter1Second() {
+            return new Promise(resolve => {
+                setTimeout(function () {
+                    resolve("fast")
+                }, waitTime)
+            })
+        }
+
+        async function shortestPathBFS() {
+            createBFSArray()
+
+            while (bfsQueue.length > 0) {
+                let currentNode = bfsQueue.shift()
+                bfsArray[currentNode[0]][currentNode[1]][0] += 1
+                let adjacentNodes = [[currentNode[0] - 1, currentNode[1]], [currentNode[0] + 1, currentNode[1]], [currentNode[0], currentNode[1] - 1], [currentNode[0], currentNode[1] + 1]]
+                for (let i = 0; i < adjacentNodes.length; i++) {
+                    if (bfsArray[adjacentNodes[i][0]][adjacentNodes[i][1]].length > 1 &&
+                        !(checker(visited, adjacentNodes[i])) &&
+                        adjacentNodes[i] !== undefined) {
+                        await resolveAfter1Second()
+                        removeTable()
+                        drawTable2()
+                        bfsArray[adjacentNodes[i][0]][adjacentNodes[i][1]][0]++
+                        bfsArray[adjacentNodes[i][0]][adjacentNodes[i][1]][1] = bfsArray[currentNode[0]][currentNode[1]][1] + 1
+                        bfsArray[adjacentNodes[i][0]][adjacentNodes[i][1]][2] = currentNode
+                        if (array[adjacentNodes[i][0]][adjacentNodes[i][1]] === "F") {
+                            path = bfsArray[adjacentNodes[i][0]][adjacentNodes[i][1]]
+                            return
+                        }
+                        visited.push(adjacentNodes[i])
+                        bfsQueue.push(adjacentNodes[i])
+                    }
+                }
+            }
+        }
+
+        function recreatePath() {
+            let temp = path
+            while (temp[2] !== null) {
+                pathArray.push(temp[2])
+                temp = bfsArray[temp[2][0]][temp[2][1]]
+            }
+        }
+
+        function handleGetPathClick() {
+            shortestPathBFS().then(() => {
+                console.log(path)
+                recreatePath()
+                removeTable()
+                drawTable2()
+            })
+        }
+    </script>
+
+</body>
+
+</html>

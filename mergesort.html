@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <title>Merge Sort</title>
+
+    <style>
+        .slider-value {
+            font-weight: bold;
+        }
+
+        .red-bar {
+            width: 3px;
+            background: red;
+            margin: 3px;
+            float: left
+        }
+
+        .blue-bar {
+            width: 3px;
+            background: lightblue;
+            margin: 3px;
+            float: left
+        }
+
+        .bar {
+            width: 3px;
+            background: black;
+            margin: 3px;
+            float: left
+        }
+
+        .box {
+            padding: 30px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="container text-center box">
+        <button type="button" class="btn btn-primary" onclick="resetVars(); randomArray();">Generate New Array</button>
+        <button type="button" class="btn btn-primary" onclick="resetSort();">Sort Array</button>
+        <button type="button" class="btn btn-primary" onclick="resetVars(); removeBars();">Clear Screen</button>
+        <div class="slidecontainer">
+            <span>Array size</span>
+            <input type="range" min="30" max="70" value="50" class="slider" id="range">
+            <span id="slider-value" class="slider-value"></span>
+            <span>Speed</span>
+            <input type="range" min="10" max="500" value="250" class="slider" id="speed">
+            <span id="speed-slider-value" class="slider-value"></span>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 offset-md-3" id="div1">
+                <div id="div2"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        var array = []
+        var globalLeft = []
+        var globalRight = []
+        var recentMerge = []
+        var running = false
+
+        var waitTime = 250
+
+        var slider = document.getElementById("range")
+        var sliderValueElement = document.getElementById("slider-value")
+        var arrayLength = slider.value
+
+        sliderValueElement.innerHTML = arrayLength
+
+        slider.oninput = function () {
+            arrayLength = this.value
+            sliderValueElement.innerHTML = this.value
+        }
+
+        var speedSlider = document.getElementById("speed")
+        var speedSliderValueElement = document.getElementById("speed-slider-value")
+        var speedSliderValue = speedSlider.value
+
+        speedSliderValueElement.innerHTML = speedSliderValue
+
+        speedSlider.oninput = function () {
+            waitTime = this.value
+            speedSliderValueElement.innerHTML = this.value
+        }
+
+        function resetVars() {
+            array = []
+            recentMerge = []
+            globalLeft = []
+            globalRight = []
+            running = false
+            return
+        }
+
+        async function resetSort() {
+            if (running === false) {
+                running = true
+                recentMerge = []
+                globalLeft = []
+                globalRight = []
+                array = await mergeSort(array)
+                recentMerge = []
+                globalLeft = []
+                globalRight = []
+                drawBars()
+            } else {
+                running === false
+            }
+
+        }
+
+        function generateRandomArray() {
+            while (array.length < arrayLength) {
+                var num = Math.floor(Math.random() * arrayLength) + 1
+                if (array.indexOf(num) === -1) array.push(num)
+            }
+            return array
+        }
+
+        function randomArray() {
+            recentMerge = []
+            globalLeft = []
+            globalRight = []
+            array = generateRandomArray()
+            drawBars();
+        }
+
+        function removeBars() {
+            const target = document.getElementById("div2")
+            while (target.previousSibling.tagName === 'DIV') {
+                target.previousSibling.remove();
+            }
+        }
+
+        function drawBars() {
+            const target = document.getElementById("div2")
+            if (target) {
+                removeBars();
+            }
+
+            for (let i in array) {
+                const newDiv = document.createElement("div")
+                if (recentMerge.includes(array[i])) {
+                    newDiv.className = "red-bar"
+                } else if (globalLeft.includes(array[i])) {
+                    newDiv.className = "blue-bar"
+                } else if (globalRight.includes(array[i])) {
+                    newDiv.className = "blue-bar"
+                } else {
+                    newDiv.className = "bar"
+                }
+
+                newDiv.id = i
+                newDiv.style.height = `${array[i] * 5}px`
+                const parentDiv = document.getElementById("div1")
+                parentDiv.insertBefore(newDiv, target)
+            }
+
+        }
+
+        function resolveAfter1Second() {
+            return new Promise(resolve => {
+                setTimeout(function () {
+                    resolve("fast")
+                }, waitTime)
+            })
+        }
+
+        async function merge(arrayLeft, arrayRight) {
+            returnArray = []
+
+            i = 0
+            j = 0
+            for (let k = 0; k < (arrayLeft.length + arrayRight.length); k++) {
+                if (i >= arrayLeft.length || j >= arrayRight.length) {
+                    if (i >= arrayLeft.length) {
+                        returnArray[k] = arrayRight[j]
+                        j++
+                    } else if (j >= arrayRight.length) {
+                        returnArray[k] = arrayLeft[i]
+                        i++
+                    }
+                } else if (arrayLeft[i] < arrayRight[j]) {
+                    returnArray[k] = arrayLeft[i]
+                    i++
+                } else {
+                    returnArray[k] = arrayRight[j]
+                    j++
+                }
+            }
+            return returnArray
+
+        }
+
+        async function mergeSort(localArray) {
+            leftIndex = 100
+            if (running === false) { return }
+
+            if (localArray.length < 2) {
+                return localArray
+            }
+            const mid = Math.floor(localArray.length / 2)
+            const left = localArray.slice(0, mid)
+            const right = localArray.slice(mid)
+
+            globalLeft = left
+            globalRight = right
+            if (running == false) { return }
+            await resolveAfter1Second()
+            drawBars()
+            if (running == false) { return }
+            const arrayLeft = await mergeSort(left)
+            const arrayRight = await mergeSort(right)
+            mergedArray = await merge(arrayLeft, arrayRight)
+            for (let i of mergedArray) {
+                if (array.indexOf(i) < leftIndex) {
+                    leftIndex = array.indexOf(i)
+                }
+            }
+
+            length = mergedArray.length
+            array.splice(leftIndex, length, ...mergedArray)
+            recentMerge = mergedArray
+            if (running == false) { return }
+            await resolveAfter1Second()
+            drawBars()
+            if (running == false) { return }
+            return mergedArray
+        }
+
+        arr = [3, 2, 1]
+        arr2 = [2, 3]
+        arr.splice(0, arr2.length, ...arr2)
+
+    </script>
+</body>
+
+
+
+
+</html>

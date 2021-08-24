@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+
+    <title>Heap Sort</title>
+
+    <style>
+        .slider-value {
+            font-weight: bold;
+        }
+
+        .red-bar {
+            width: 3px;
+            background: red;
+            margin: 3px 10px;
+            float: left
+        }
+
+        .blue-bar {
+            width: 3px;
+            background: lightblue;
+            margin: 3px;
+            float: left
+        }
+
+        .bar {
+            width: 3px;
+            background: black;
+            margin: 3px;
+            float: left
+        }
+
+        .box {
+            padding: 30px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container text-center box">
+        <button type="button" class="btn btn-primary" onclick="resetVars(); randomArray();">Generate New Array</button>
+        <button type="button" class="btn btn-primary" onclick="resetSort();">Sort Array</button>
+        <button type="button" class="btn btn-primary" onclick="removeBars(); resetVars();">Clear Screen</button>
+        <div class="slidecontainer">
+            <span>Array size</span>
+            <input type="range" min="30" max="70" value="50" class="slider" id="range">
+            <span id="slider-value" class="slider-value"></span>
+            <span>Speed</span>
+            <input type="range" min="10" max="500" value="250" class="slider" id="speed">
+            <span id="speed-slider-value" class="slider-value"></span>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 offset-md-3" id="div1">
+                <div id="div2"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var array = []
+        var waitTime = 250
+        var arrayLength = 50
+        var running = true
+        var current = -1
+        var sorted = 1000000
+
+        var slider = document.getElementById("range")
+        var sliderValueElement = document.getElementById("slider-value")
+        var arrayLength = slider.value
+
+        sliderValueElement.innerHTML = arrayLength
+
+        slider.oninput = function () {
+            arrayLength = this.value
+            sliderValueElement.innerHTML = this.value
+        }
+
+        var speedSlider = document.getElementById("speed")
+        var speedSliderValueElement = document.getElementById("speed-slider-value")
+        var speedSliderValue = speedSlider.value
+
+        speedSliderValueElement.innerHTML = speedSliderValue
+
+        speedSlider.oninput = function () {
+            waitTime = this.value
+            speedSliderValueElement.innerHTML = this.value
+        }
+
+        function resetVars() {
+            current = -1
+            sorted = 1000000
+            running = false
+            return
+        }
+
+        function randomArray() {
+            array = generateRandomArray()
+            sorted = 1000000
+            drawBars();
+        }
+
+        function resetSort() {
+            if (running === false) {
+                running = true
+                current = -1
+                sorted = 1000000
+                heapSort(array)
+            } else {
+                current = -1
+                sorted = 1000000
+                running === false
+            }
+
+        }
+
+        function removeBars() {
+            const target = document.getElementById("div2")
+            while (target.previousSibling.tagName === 'DIV') {
+                target.previousSibling.remove();
+            }
+        }
+
+        function drawBars() {
+            const target = document.getElementById("div2")
+            if (target) {
+                removeBars();
+            }
+
+            for (let index in array) {
+                const newDiv = document.createElement("div")
+
+                if (index == current) {
+                    newDiv.className = "red-bar"
+                }
+                else if (index > sorted) {
+                    newDiv.className = "blue-bar"
+                }
+                else {
+                    newDiv.className = "bar"
+                }
+                newDiv.id = index
+                newDiv.style.height = `${array[index] * 5}px`
+                const parentDiv = document.getElementById("div1")
+                parentDiv.insertBefore(newDiv, target)
+            }
+        }
+
+
+
+        function generateRandomArray() {
+            array = Array.from({ length: arrayLength }, () => Math.floor(Math.random() * arrayLength))
+            return array
+        }
+
+        function resolveAfter1Second() {
+            return new Promise(resolve => {
+                setTimeout(function () {
+                    resolve("fast")
+                }, waitTime)
+            })
+        }
+
+        async function heapify(localArray, localArrayLength, localIndex) {
+            left = localIndex * 2 + 1
+            right = localIndex * 2 + 2
+            largest = localIndex
+
+            if (left < localArrayLength && localArray[left] > array[largest]) {
+                largest = left
+            }
+            if (right < localArrayLength && localArray[right] > array[largest]) {
+                largest = right
+            }
+            if (largest != localIndex) {
+                current = largest
+                await resolveAfter1Second()
+                if (running === false) { current = -1; sorted = arrayLength; return }
+                drawBars()
+                if (running === false) { current = -1; sorted = arrayLength; return }
+
+                temp = array[localIndex]
+                array[localIndex] = array[largest]
+                array[largest] = temp
+
+                current = localIndex
+                await resolveAfter1Second()
+                if (running === false) { current = -1; sorted = arrayLength; return }
+                drawBars()
+                if (running === false) { current = -1; sorted = arrayLength; return }
+
+                await heapify(array, localArrayLength, largest)
+            }
+        }
+
+        async function heapSort(array) {
+            var localArrayLength = array.length
+
+            for (let i = Math.floor(localArrayLength / 2) - 1; i >= 0; i--)
+                await heapify(array, localArrayLength, i);
+
+            for (let i = localArrayLength - 1; i > 0; i--) {
+                var temp = array[0];
+                array[0] = array[i];
+                array[i] = temp;
+                sorted = i - 1
+                await resolveAfter1Second()
+                if (running === false) { current = -1; sorted = arrayLength; return }
+                drawBars()
+                if (running === false) { current = -1; sorted = arrayLength; return }
+                await heapify(array, i, 0);
+            }
+
+        }
+
+
+
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <title>Fibonacci</title>
+    <style>
+        table,
+        th,
+        td {
+            border: 3px solid black;
+            border-collapse: collapse;
+        }
+
+        td {
+            padding: 10px;
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 15px;
+            border-radius: 5px;
+            background: #d3d3d3;
+            outline: none;
+            opacity: 0.7;
+            -webkit-transition: .2s;
+            transition: opacity .2s;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #04AA6D;
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #04AA6D;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container"> <br /><br /><br />
+        <h1>Fibonacci Calculator</h1>
+        <h3 id="answer-number"></h3>
+        <input type="range" min="3" max="500" value="50" class="slider" id="speed">
+        <h3>Dynamic Programming Table</h3>
+    </div>
+    <div class="container">
+        <table id="marker"></table>
+    </div>
+
+    <script>
+
+        var fibVal = 50
+        var answer
+        var table
+        var table = null
+
+        var speedSlider = document.getElementById("speed")
+        var speedSliderValue = speedSlider.value
+
+        calculateFib()
+        drawTable()
+
+        speedSlider.oninput = function () {
+            fibVal = this.value
+            removeTable()
+            calculateFib()
+            drawTable()
+        }
+
+        function drawTable() {
+            document.getElementById("answer-number").innerText = `Number: ${fibVal} Answer: ${answer}`
+
+            const newTable = document.getElementById("marker")
+            tableRow = newTable.insertRow()
+
+            for (var i = 1; i < table.length; i++) {
+                cell = tableRow.insertCell()
+                text = document.createTextNode(`${table[i]}`)
+                cell = cell.appendChild(text)
+                if (i != table.length - 1 && i % 10 === 0) {
+                    newTable.appendChild(tableRow)
+                    tableRow = newTable.insertRow()
+                }
+
+            }
+            newTable.appendChild(tableRow)
+        }
+
+        function removeTable() {
+            const newTable = document.getElementById("marker")
+            while (newTable.hasChildNodes()) {
+                newTable.firstChild.remove();
+            }
+        }
+
+        function calculateFib() {
+            localTable = Array(parseInt(fibVal) + 1).fill(0)
+            localTable[1] = 1
+            localTable[2] = 1
+            for (let i = 3; i < parseInt(fibVal) + 1; i++) {
+                localTable[i] = localTable[i - 1] + localTable[i - 2]
+            }
+            table = localTable
+            answer = localTable[fibVal]
+        }
+
+
+    </script>
+</body>
+
+</html>
+<!-- 
+function drawTable() {
+
+const newTable = document.getElementById("marker")
+header = newTable.createTHead()
+
+row = header.insertRow()
+cell = row.insertCell()
+text = document.createTextNode(`Your Number`)
+cell = cell.appendChild(text)
+
+cell = row.insertCell()
+text = document.createTextNode(`Answer`)
+cell = cell.appendChild(text)
+
+cell = row.insertCell()
+text = document.createTextNode(`Dynamic Programming Table`)
+cell.setAttribute("colspan", "1000")
+cell = cell.appendChild(text)
+newTable.appendChild(header)
+
+for (var i = 0; i < tables.length; i++) { tableRow=newTable.insertRow() cell=tableRow.insertCell()
+    text=document.createTextNode(`${numbers[i]}`) cell=cell.appendChild(text) cell=tableRow.insertCell()
+    text=document.createTextNode(`${answers[i]}`) cell=cell.appendChild(text) for (var j=1; j < tables[i].length; j++) {
+    cell=tableRow.insertCell() text=document.createTextNode(`${tables[i][j]}`) cell=cell.appendChild(text) if (j
+    !=tables[i].length - 1 && j % 10===0) { newTable.appendChild(tableRow) tableRow=newTable.insertRow()
+    cell=tableRow.insertCell() cell=tableRow.insertCell() } } newTable.appendChild(tableRow) } } -->

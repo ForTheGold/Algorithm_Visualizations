@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <title>Best Sum</title>
+    <style>
+        table,
+        th,
+        td {
+            border: 3px solid black;
+            border-collapse: collapse;
+        }
+
+        td {
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container"> <br /><br /><br />
+        <h1>Fibonacci Calculator</h1>
+        <h3 id="answer-number"></h3>
+        <span>Target Value</span>
+        <input type="range" min="1" max="100" value="50" class="slider" id="target">
+        <span id="target-value" class="slider-value"></span>
+        <span>Array Length</span>
+        <input type="range" min="1" max="100" value="50" class="slider" id="array-length">
+        <span id="array-length-value" class="slider-value"></span>
+        <h3>Dynamic Programming Table</h3>
+    </div>
+    <div class="container">
+        <table id="marker"></table>
+    </div>
+
+    <script>
+        var array
+        var arrayLength = 20
+        var targetValue = 50
+        var answer
+        var table = null
+
+        var targetSlider = document.getElementById("target")
+        var targetSilverValueElement = document.getElementById("target-value")
+        var targetSilverValue = targetSlider.value
+
+        generateRandomArray()
+        bestSumFinder()
+        drawTable()
+
+        targetSlider.oninput = function () {
+            targetValue = this.value
+            targetSilverValueElement.innerHTML = this.value
+            removeTable()
+            bestSumFinder()
+            drawTable()
+        }
+
+        var arrayLengthSlider = document.getElementById("array-length")
+        var arrayLengthSliderValueElement = document.getElementById("array-length-value")
+        var arrayLengthSliderValue = arrayLengthSlider.value
+
+        arrayLengthSliderValueElement.innerHTML = arrayLengthSliderValue
+
+        arrayLengthSlider.oninput = function () {
+            arrayLength = this.value
+            arrayLengthSliderValueElement.innerHTML = this.value
+            generateRandomArray()
+            removeTable()
+            bestSumFinder()
+            drawTable()
+        }
+
+        function generateRandomArray() {
+            array = Array.from({ length: arrayLength }, () => Math.floor(Math.random() * arrayLength))
+            return array
+        }
+
+        function drawTable() {
+            document.getElementById("answer-number").innerHTML = `Target Value: ${targetValue} <br /> Best Combo: [${answer}] <br /> Array: [${array}]`
+
+            const newTable = document.getElementById("marker")
+            tableRow = newTable.insertRow()
+
+            for (var i = 1; i < table.length; i++) {
+                cell = tableRow.insertCell()
+                text = document.createTextNode(`[${table[i]}]`)
+                cell = cell.appendChild(text)
+                if (i != table.length - 1 && i % 10 === 0) {
+                    newTable.appendChild(tableRow)
+                    tableRow = newTable.insertRow()
+                }
+
+            }
+            newTable.appendChild(tableRow)
+        }
+
+        function removeTable() {
+            const newTable = document.getElementById("marker")
+            while (newTable.hasChildNodes()) {
+                newTable.firstChild.remove();
+            }
+        }
+
+        function bestSumFinder() {
+
+            localTable = new Array(targetValue + 1).fill(null)
+            localTable[0] = []
+            for (let i = 0; i <= targetValue; i++) {
+                if (localTable[i] !== null) {
+                    for (j of array) {
+                        combination = [...localTable[i], j]
+                        if (!localTable[i + j] || combination.length < localTable[i + j].length) {
+                            localTable[i + j] = combination
+                        }
+                    }
+                }
+            }
+            table = localTable
+            answer = localTable[targetValue]
+            return localTable[targetValue]
+
+        }
+
+
+    </script>
+</body>
+
+</html>
+<!-- 
+function drawTable() {
+
+const newTable = document.getElementById("marker")
+header = newTable.createTHead()
+
+row = header.insertRow()
+cell = row.insertCell()
+text = document.createTextNode(`Your Number`)
+cell = cell.appendChild(text)
+
+cell = row.insertCell()
+text = document.createTextNode(`Answer`)
+cell = cell.appendChild(text)
+
+cell = row.insertCell()
+text = document.createTextNode(`Dynamic Programming Table`)
+cell.setAttribute("colspan", "1000")
+cell = cell.appendChild(text)
+newTable.appendChild(header)
+
+for (var i = 0; i < tables.length; i++) { tableRow=newTable.insertRow() cell=tableRow.insertCell()
+    text=document.createTextNode(`${numbers[i]}`) cell=cell.appendChild(text) cell=tableRow.insertCell()
+    text=document.createTextNode(`${answers[i]}`) cell=cell.appendChild(text) for (var j=1; j < tables[i].length; j++) {
+    cell=tableRow.insertCell() text=document.createTextNode(`${tables[i][j]}`) cell=cell.appendChild(text) if (j
+    !=tables[i].length - 1 && j % 10===0) { newTable.appendChild(tableRow) tableRow=newTable.insertRow()
+    cell=tableRow.insertCell() cell=tableRow.insertCell() } } newTable.appendChild(tableRow) } } -->
